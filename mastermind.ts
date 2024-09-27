@@ -1,4 +1,4 @@
-const readline = require("node:readline/promises");
+const readline = require("node:readline");
 
 const { stdin: input, stdout: output } = require("node:process");
 
@@ -15,7 +15,8 @@ class Mastermind {
     this.numOfRounds = 10;
     this.possibleColors = possibleColors;
   }
-  async play() {
+
+  play() {
     console.log(
       "\nWelcome to fall themed mastermind 🍂!\nYour goal is to guess 4 colors in a specific order.\nPossible colors are: persimmon (P), brick (B), camel (C), saffron (S), azalea (A), and rust (R).\n"
     );
@@ -26,27 +27,30 @@ class Mastermind {
     console.log(
       "Your goal is to get the correct value (which is all four correct colors in the correct position - as 🍁).\n"
     );
-    while (this.numOfRounds > 0) {
-      const guessString = await rl.question(
-        `ROUND ${this.numOfRounds}:\n\nPlease take your guess.\nRemember to add a space (" ") in between your color codes.\nOptions are: P (persimmon), B (brick), C (camel), S (saffron), A (azalea), and R (rust)\n\n`
-      );
+    this.playTurn();
+  }
 
-      const guess = guessString.trim().split(" ");
-      const checkedGuess = this.checkGuess(guess);
-      if (this.hasWon(checkedGuess)) {
-        console.log("\n\nYOU WON 🌳🌳🌳\n\n");
-        rl.close();
-        return;
-      } else {
-        console.log(`\n${checkedGuess.join(" ")}\n`);
-      }
-      this.numOfRounds--;
-    }
+  playTurn() {
     if (this.numOfRounds === 0) {
       console.log(
         `Unfortunately you've hit your max number of chances to play the game! Here's the anwer: ${code}. Better luck next time!`
       );
     }
+    rl.question(
+      `ROUND ${this.numOfRounds}:\n\nPlease take your guess.\nRemember to add a space (" ") in between your color codes.\nOptions are: P (persimmon), B (brick), C (camel), S (saffron), A (azalea), and R (rust)\n\n`,
+      (answer) => {
+        const guess = answer.trim().split(" ");
+        const checkedGuess = this.checkGuess(guess);
+        if (this.hasWon(checkedGuess)) {
+          console.log("\n\nYOU WON 🌳🌳🌳\n\n");
+          rl.close();
+        } else {
+          console.log(`\n${checkedGuess.join(" ")}\n`);
+          this.numOfRounds--;
+          this.playTurn();
+        }
+      }
+    );
   }
 
   hasWon(hint: string[]) {
@@ -122,4 +126,8 @@ const possibleColors = [
 ];
 const game = new Mastermind(possibleColors);
 
-console.log(game.play());
+game.play();
+
+/* things I wanted to work on below */
+/* 1. Decouple coming up with raw hints to printing the hints in the preferred format */
+/* 2. How to do the prompting process synchronously */
