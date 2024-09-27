@@ -45,7 +45,7 @@ class Mastermind {
           console.log("\n\nYOU WON 🌳🌳🌳\n\n");
           rl.close();
         } else {
-          console.log(`\n${checkedGuess.join(" ")}\n`);
+          console.log(`\n${this.formatHint(checkedGuess)}\n`);
           this.numOfRounds--;
           this.playTurn();
         }
@@ -54,13 +54,13 @@ class Mastermind {
   }
 
   hasWon(hint: string[]) {
-    let autumnLeaves = 0;
+    let wins = 0;
     for (const value of hint) {
-      if (value === "🍁") {
-        autumnLeaves += 1;
+      if (value === "B") {
+        wins += 1;
       }
     }
-    return autumnLeaves === 4;
+    return wins === 4;
   }
 
   checkGuess(guess: string[]) {
@@ -75,35 +75,47 @@ class Mastermind {
       }
     }
 
-    // red leaves
     for (let i = 0; i < guess.length; i++) {
       const currentColor = guess[i];
       if (currentColor === code[i] && count[currentColor] > 0) {
-        hint[i] = "🍁";
+        hint[i] = "B";
         count[currentColor]--;
       }
     }
 
-    // green leaves
     for (let i = 0; i < guess.length; i++) {
       const currentColor = guess[i];
       if (
         code.includes(currentColor) &&
         count[currentColor] > 0 &&
-        hint[i] !== "🍁"
+        hint[i] !== "B"
       ) {
-        hint[i] = "🌿";
+        hint[i] = "W";
         count[currentColor]--;
       }
     }
 
     for (let i = 0; i < guess.length; i++) {
-      if (hint[i] !== "🌿" && hint[i] !== "🍁") {
+      if (hint[i] !== "B" && hint[i] !== "W") {
         hint[i] = "-";
       }
     }
 
     return hint;
+  }
+  formatHint(hint: string[]) {
+    let formattedHint: string[] = [];
+    for (let i = 0; i < hint.length; i++) {
+      let character = hint[i];
+      if (character === "B") {
+        formattedHint.push("🍁");
+      } else if (character === "W") {
+        formattedHint.push("🌿");
+      } else {
+        formattedHint.push("-");
+      }
+    }
+    return formattedHint.join(" ");
   }
 }
 
