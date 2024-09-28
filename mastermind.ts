@@ -4,16 +4,30 @@ const { stdin: input, stdout: output } = require("node:process");
 
 const rl = readline.createInterface({ input, output });
 
-// TODO: add a function to generate code randomly
-const code = ["C", "C", "B", "A"];
+// TODO: add a function to generate this.code randomly
+// const code = ["C", "C", "B", "A"];
 
 class Mastermind {
   numOfRounds: number;
   possibleColors: string[];
+  code: string[];
+  colorCode: { [k: string]: string };
 
-  constructor(possibleColors: string[]) {
+  constructor(possibleColors: string[], colorCode: { [k: string]: string }) {
     this.numOfRounds = 10;
     this.possibleColors = possibleColors;
+    this.code = this.generateRandomCode();
+  }
+
+  generateRandomCode() {
+    const randomCode: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      const randomNumber = Math.floor(
+        Math.random() * this.possibleColors.length
+      );
+      randomCode.push(colorCode[this.possibleColors[randomNumber]]);
+    }
+    return randomCode;
   }
 
   play() {
@@ -33,7 +47,7 @@ class Mastermind {
   playTurn() {
     if (this.numOfRounds === 0) {
       console.log(
-        `Unfortunately you've hit your max number of chances to play the game! Here's the anwer: ${code}. Better luck next time!`
+        `Unfortunately you've hit your max number of chances to play the game! Here's the anwer: ${this.code}. Better luck next time!`
       );
     }
     rl.question(
@@ -67,7 +81,7 @@ class Mastermind {
     let hint: Array<string> = [];
     const count = {};
 
-    for (const color of code) {
+    for (const color of this.code) {
       if (count.hasOwnProperty(color)) {
         count[color] = count[color] + 1;
       } else {
@@ -77,7 +91,7 @@ class Mastermind {
 
     for (let i = 0; i < guess.length; i++) {
       const currentColor = guess[i];
-      if (currentColor === code[i] && count[currentColor] > 0) {
+      if (currentColor === this.code[i] && count[currentColor] > 0) {
         hint[i] = "B";
         count[currentColor]--;
       }
@@ -86,7 +100,7 @@ class Mastermind {
     for (let i = 0; i < guess.length; i++) {
       const currentColor = guess[i];
       if (
-        code.includes(currentColor) &&
+        this.code.includes(currentColor) &&
         count[currentColor] > 0 &&
         hint[i] !== "B"
       ) {
@@ -119,7 +133,7 @@ class Mastermind {
   }
 }
 
-const colorCode = {
+const colorCode: { [k: string]: string } = {
   persimmon: "P",
   camel: "C",
   brick: "B",
@@ -136,7 +150,7 @@ const possibleColors = [
   "saffron",
   "rust",
 ];
-const game = new Mastermind(possibleColors);
+const game = new Mastermind(possibleColors, colorCode);
 
 game.play();
 
