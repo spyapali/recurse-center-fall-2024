@@ -1,6 +1,5 @@
 function chunk<T>(arr: T[], size: number): T[][] {
   let finalArray: T[][] = [];
-  console.log({ arr });
   arr.forEach((element, index) => {
     if (index % size === 0) {
       finalArray.push([]);
