@@ -1,37 +1,68 @@
 import { useState, useRef, useCallback } from 'react';
 import './App.css';
-import useGifSearch from './useGifSearch';
 import { ReactComponent as MagnifyingGlass } from "./magnifying-glass.svg"
+import axios from 'axios';
 
-const LIMIT = 50
 
 function App() {
   const [paginationOffset, setPaginationOffset] = useState(0);
   const [content, setContent] = useState("");
+  const [images, setImages] = useState([])
+  const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState(null)
   const observer = useRef()
 
-  const { images, loading, error } = useGifSearch(content, paginationOffset)
+  const getGifs = useCallback(async (paginationOffset) => {
+    setLoading(true)
+    setError(false)
+    try {
+      const res = await axios({
+        method: 'GET',
+        url: "https://api.giphy.com/v1/gifs/search",
+        params: { q: content, offset: paginationOffset, api_key: "kW78yTaEPgpkR20P6mUjbAQ92oQo3lUw" }
+      });
+      setImages(images => {
+        return [...new Set([...images, ...res.data.data.map((image) => image.images.original.url)])];
+      });
+      setLoading(false);
+      if (res.data.pagination.count === 0) {
+        setHasMore(false)
+      }
+      return res.data.pagination.count + paginationOffset
+    } catch (e) {
+      setError(e.message);
+    }
+  }, [content])
 
-  const lastImageElementRef = useCallback(node => {
+  const search = async () => {
+    setImages([])
+    setPaginationOffset(0)
+    const offset = await getGifs(paginationOffset)
+    setPaginationOffset(offset)
+  }
+
+  const lastImageElementRef = useCallback((node) => {
     if (loading) return;
     if (observer.current) observer.current.disconnect()
-    observer.current = new IntersectionObserver(images => {
-      if (images[0].isIntersecting) {
-        setPaginationOffset(prevPaginationOffset => prevPaginationOffset + LIMIT)
+    observer.current = new IntersectionObserver(async (images) => {
+      if (images[0].isIntersecting && hasMore) {
+        const offset = await getGifs(paginationOffset)
+        setPaginationOffset(offset)
       }
     })
     if (node) observer.current.observe(node)
-  }, [loading])
+  }, [getGifs, hasMore, loading, paginationOffset])
 
 
   return (
     <div className="bg-black p-20">
       <div className="mx-auto w-fit">
-        {/* <div className="text-center mb-8 text-4xl text-white font-bold">Home Sweet Home 🏠</div> */}
-
-        <div className="flex">
-          <input className="rounded-l-lg text-center text-2xl w-[150px] md:w-[500px] lg:w-[1000px] text-white font-bold" />
-          <button className="p-5 rounded-r-lg border-x-from-purple-500 bg-gradient-to-r from-purple-500 to-pink-500"><MagnifyingGlass className="w-14 h-14" /></button>
+        <div className="flex mb-5">
+          <div className="flex mx-auto">
+            <input className="rounded-l-lg p-5 text-2xl w-[150px] md:w-[500px] lg:w-[1050px] font-normal" value={content} onChange={(e) => setContent(e.target.value)} />
+            <button className="p-5 rounded-r-lg border-x-from-purple-500 bg-gradient-to-r from-purple-500 to-pink-500" onClick={search}><MagnifyingGlass className="w-14 h-14" /></button>
+          </div>
         </div>
         <div className="columns-4">
           {images.map((image, index) => {
