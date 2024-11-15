@@ -3,7 +3,7 @@ import './App.css';
 import { ReactComponent as MagnifyingGlass } from "./magnifying-glass.svg"
 import axios from 'axios';
 import ImageLoader from './ImageLoader';
-
+import clsx from "clsx";
 
 function App() {
   const [paginationOffset, setPaginationOffset] = useState(0);
@@ -55,7 +55,6 @@ function App() {
     if (observer.current) observer.current.disconnect()
     observer.current = new IntersectionObserver(async (images) => {
       if (images[0].isIntersecting && hasMore) {
-        console.log("hello")
         const offset = await getGifs(paginationOffset)
         setPaginationOffset(offset)
       }
@@ -64,9 +63,19 @@ function App() {
   }, [getGifs, hasMore, loading, paginationOffset])
 
 
+  const contentAvailable = images.length > 0;
+  const GiphyImage = (
+    <div className={clsx(contentAvailable ? "text-3xl" : "text-7xl", "mx-auto mb-2 rounded-full flex items-center justify-center font-bold")}>
+      <span className="animate-gradient bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 bg-clip-text text-transparent bg-[length:200%_auto]">
+        YIPPY
+      </span>
+    </div>
+  )
+
   return (
-    <div className="bg-black min-h-screen">
+    <div className={clsx({ "flex flex-col justify-center": !contentAvailable }, "bg-black min-h-screen px-20")}>
       <div className="mx-auto w-fit">
+        {!contentAvailable ? GiphyImage : null}
         <div className="flex py-5 sticky top-0 bg-black">
           <div className="flex mx-auto">
             <input className="rounded-l-lg p-5 text-2xl w-[150px] md:w-[500px] lg:w-[1050px] font-normal" value={content} onChange={(e) => setContent(e.target.value)} />

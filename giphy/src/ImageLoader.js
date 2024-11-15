@@ -29,7 +29,12 @@ const ImageLoader = ({ src, alt, height, reference }) => {
                 onLoad={handleImageLoad}
                 onError={handleImageError}
                 height={height}
-                className={clsx(isLoading ? `bg-amber-500` : "", "border-yellow-600 border-2 mb-2 rounded-md")}// Hide the image while loading
+                className={clsx(
+                    "border-yellow-600 border-2 mb-2 rounded-md",
+                    {
+                        'bg-amber-500': isLoading,
+                    }
+                )}
             />
         </div>
     );
