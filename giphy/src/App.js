@@ -34,19 +34,20 @@ function App() {
         );
       });
       setLoading(false);
-      if (res.data.pagination.count === 0) {
+      if (res.data.pagination.count === 0 && hasMore) {
         setHasMore(false)
       }
       return res.data.pagination.count + paginationOffset
     } catch (e) {
       setError(e.message);
     }
-  }, [content])
+  }, [content, hasMore])
+
 
   const search = async () => {
     setImages([])
-    setPaginationOffset(0)
-    const offset = await getGifs(paginationOffset)
+    setHasMore(true)
+    const offset = await getGifs(0)
     setPaginationOffset(offset)
   }
 
